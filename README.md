@@ -10,7 +10,7 @@ The program writes a single one-line sport the Olympics rejected to
 broadcast, absurd enough to be funny, and short enough to fit the
 200-character gate.
 
-The line (152 characters):
+The line (151 characters):
 
 > 100-Metre Toddler Chase: parents sprint after a naked toddler who has taken the car keys; four Olympics in, the toddler remains the defending champion.
 
@@ -35,7 +35,8 @@ That writes the line to `/output/entry.txt` (UTF-8, no trailing
 newline). Set `MAKEFUN_OUTPUT_DIR` to write somewhere else locally. The
 program is deterministic, uses only the Node standard library, and
 checks the line against the competition's 1-200 character gate before
-writing it.
+writing it. Run it with `--check` to re-read the written file and verify
+it byte for byte against the line.
 
 ## Limitations
 

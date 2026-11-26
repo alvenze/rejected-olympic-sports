@@ -18,7 +18,7 @@
 // Local run, standing in for the grader's /output:
 //   MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const LINE =
@@ -39,6 +39,22 @@ function outputDir(): string {
   return '/output';
 }
 
+function verifyWritten(path: string): boolean {
+  // Re-read the written file and check it byte for byte. The gate counts
+  // the characters of the file as written, so a partial write, a stray
+  // trailing newline, or a re-encoding must be caught here rather than
+  // by the sealed scorer.
+  let raw: Buffer;
+  try {
+    raw = readFileSync(path);
+  } catch {
+    return false;
+  }
+  const expected = Buffer.from(LINE, 'utf8');
+  if (!raw.equals(expected)) return false;
+  return gateOk(raw.toString('utf8'));
+}
+
 if (!gateOk(LINE)) {
   console.error('entry line fails the gate; refusing to write');
   process.exit(1);
@@ -48,4 +64,13 @@ const dir = outputDir();
 mkdirSync(dir, { recursive: true });
 const path = join(dir, 'entry.txt');
 writeFileSync(path, LINE, 'utf8');
-console.log(`wrote ${[...LINE].length} chars to ${path}`);
+
+if (process.argv.includes('--check')) {
+  if (!verifyWritten(path)) {
+    console.error(`verification failed for ${path}`);
+    process.exit(1);
+  }
+  console.log(`verified ${path}: ${[...LINE].length} chars, gate ok`);
+} else {
+  console.log(`wrote ${[...LINE].length} chars to ${path}`);
+}
